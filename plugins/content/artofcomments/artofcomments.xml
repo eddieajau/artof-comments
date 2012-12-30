@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5.0" type="plugin" group="content" method="upgrade">
+	<name>plg_content_artofcomments</name>
+	<author>New Life in IT Pty Ltd</author>
+	<creationDate>December 2012</creationDate>
+	<copyright>Copyright (C) 2005 - 2013 New Life in IT Pty Ltd. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>andrew.eddie@newlifeinit.com</authorEmail>
+	<authorUrl>www.theartofjoomla.com</authorUrl>
+	<version>1.0</version>
+	<description>PLG_ARTOFCOMMENTS_XML_DESCRIPTION</description>
+
+	<files>
+		<folder>forms</folder>
+		<folder>language</folder>
+		<filename plugin="artofcomments">artofcomments.php</filename>
+		<filename>index.html</filename>
+	</files>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="provider_id" type="text" size="50"
+					label="PLG_ARTOFCOMMENTS_PROVIDER_ID_LABEL" description="PLG_ARTOFCOMMENTS_PROVIDER_ID_DESC" />
+
+				<field name="developer" type="list" default="0"
+					label="PLG_ARTOFCOMMENTS_DEVELOPER_LABEL" description="PLG_ARTOFCOMMENTS_DEVELOPER_DESC">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+			</fieldset>			
+		</fields>
+	</config>
+</extension>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="params">
+		<fieldset name="basic">
+			<field
+				name="enable_artofcomments"
+				type="list"
+				label="PLG_ARTOFCOMMENTS_ENABLE_LABEL"
+				description="PLG_ARTOFCOMMENTS_ENABLE_DESC">
+				<option value="">JGLOBAL_USE_GLOBAL</option>
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+		</fieldset>
+	</fields>
+</form>
