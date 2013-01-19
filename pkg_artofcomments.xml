@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="package" version="2.5">
+	<name>Artof Comments</name>
+	<author>Andrew Eddie</author>
+	<creationDate></creationDate>
+	<copyright>Copyright (C) 2005 - 2013 New Life in IT Pty Ltd. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later.</license>
+	<authorEmail>andrew.eddie@newlifeinit.com</authorEmail>
+	<url>http://www.theartofjoomla.com/extensions/artof-comments.html</url>
+	<version></version>
+	<description>Artof Comments package.</description>
+
+	<packagename>artofcomments</packagename>
+	<packager>Andrew Eddie</packager>
+	<packagerurl>http://www.theartofjoomla.com/extensions/artof-comments.html</packagerurl>
+
+	<updateservers>
+		<!-- Note: No spaces or linebreaks allowed between the server tags -->
+		<server type="extension" name="Artof Comments Update Site">http://www.theartofjoomla.com/index.php?option=com_ars&amp;view=update&amp;task=stream&amp;format=xml&amp;id=1</server>
+	</updateservers>
+
+	<files>
+		<file type="plugin" id="artofcomments" group="content">plg_content_artofcomments.zip</file>
+	</files>
+</extension>

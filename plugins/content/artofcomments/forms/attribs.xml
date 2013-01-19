@@ -7,7 +7,7 @@
 				type="list"
 				label="PLG_ARTOFCOMMENTS_ENABLE_LABEL"
 				description="PLG_ARTOFCOMMENTS_ENABLE_DESC">
-				<option value="">JGLOBAL_USE_GLOBAL</option>
+				<option value="">PLG_ARTOFCOMMENTS_USE_CATEGORY</option>
 				<option value="0">JNO</option>
 				<option value="1">JYES</option>
 			</field>

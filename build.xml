@@ -25,6 +25,19 @@
 
 	<!-- MAIN -->
 	<target name="main" description="Creates an extension build file">
+		<!-- Set up the format for the current date -->
+		<tstamp>
+			<format property="TODAY" pattern="%Y-%m-%d %H:%M" />
+		</tstamp>
+		
+		<!-- Pull the version number out of the package manifest -->
+		<loadfile property="package.version" file="${targetdir}/build.version.txt" />
+		<if>
+			<equals arg1="${package.version}" arg2="" />
+			<then>
+				<property name="package.version" value="master" />
+			</then>
+		</if>
 
 		<!-- Cleanup build area -->
 		<delete dir="${targetdir}/package" />
@@ -36,6 +49,32 @@
 			<property name="extname" value="plg_content_artofcomments" />
 			<!-- <property name="extsub" value="admin" /> -->
 		</phingcall>
+
+		<!-- Now make the final package -->
+		<delete file="${targetdir}/${package}.${package.version}.zip" />
+		
+		<!-- Copy the manifest, replacing the current date. -->
+		<copy
+			file="${targetdir}/pkg_${package}.xml"
+			tofile="${targetdir}/package/pkg_${package}.xml" overwrite="true">
+			<filterchain>
+				<replaceregexp>
+					<regexp pattern="version&gt;&lt;/version" replace="version&gt;${package.version}&lt;/version" ignoreCase="true"/>
+					<regexp pattern="creationDate&gt;&lt;/creationDate" replace="creationDate&gt;${TODAY}&lt;/creationDate" ignoreCase="true"/>
+				</replaceregexp>
+			</filterchain>
+		</copy>
+
+		<zip
+			destfile="${targetdir}/${package}.${package.version}.zip"
+			basedir="${targetdir}/package">
+			<fileset dir="${targetdir}/package">
+				<include name="*zip" />
+			</fileset>
+			<fileset dir="${targetdir}/package">
+				<include name="pkg_${package}.xml" />
+			</fileset>
+		</zip>
 	</target>
 
 	<target name="build" description="Packages the extension for delivery">
@@ -46,16 +85,6 @@
 			</not>
 			<then>
 				<property name="build" value="1" />
-			</then>
-		</if>
-
-		<!-- Option to include the version number in the final file names. --> 
-		<if>
-			<not>
-				<isset property="package.version" />
-			</not>
-			<then>
-				<property name="package.version" value="master" />
 			</then>
 		</if>
 
@@ -103,6 +132,15 @@
 				<include name="**" />
 				<exclude name=".*" />
 			</fileset>
+			<filterchain>
+				<!-- Replace the verison and createdDate tags to agree with the package. -->
+				<replaceregexp>
+					<regexp pattern="version&gt;{{VERSION}}&lt;/version" 
+						replace="version&gt;${package.version}&lt;/version" ignoreCase="true"/>
+					<regexp pattern="creationDate&gt;{{CREATIONDATE}}&lt;/creationDate" 
+						replace="creationDate&gt;${TODAY}&lt;/creationDate" ignoreCase="true"/>
+				</replaceregexp>
+			</filterchain>
 		</copy>
 
 		<!-- Special case for components. Put the XML file in the correct place -->
@@ -132,23 +170,10 @@
 		<if>
 			<equals arg1="${build}" arg2="1" />
 			<then>
-				<delete file="${targetdir}/package/${extname}.${package.version}.tar.gz" />
-				
-				<tar
-					destfile="${targetdir}/package/${extname}.${package.version}.tar.gz"
-					basedir="${targetdir}/package/${extname}"
-					includeEmptyDirs="0"
-					compression="gzip">
-					<fileset dir="${targetdir}/package/${extname}">
-						<include name="**" />
-						<exclude name=".*" />
-					</fileset>
-				</tar>
-
-				<delete file="${targetdir}/package/${extname}.${package.version}.zip" />
+				<delete file="${targetdir}/package/${extname}.zip" />
 		
 				<zip
-					destfile="${targetdir}/package/${extname}.${package.version}.zip"
+					destfile="${targetdir}/package/${extname}.zip"
 					basedir="${targetdir}/package/${extname}">
 					<fileset dir="${targetdir}/package/${extname}">
 						<include name="**" />

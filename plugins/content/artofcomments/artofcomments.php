@@ -1,6 +1,6 @@
 <?php
 /**
- * @package  	  NewLifeInIT
+ * @package  	NewLifeInIT
  * @subpackage  plg_content_artofcomments
  * @copyright   Copyright (C) 2005 - 2013 New Life in IT Pty Ltd. All rights reserved.
  * @license     GNU General Public License version 2 or later when included with or used in the Joomla CMS.
@@ -21,50 +21,35 @@ defined('_JEXEC') or die;
 class plgContentArtofcomments extends JPlugin
 {
 	/**
+	 * Stores whether comments are enabled for content.
+	 *
+	 * @var    array
+	 * @since  1.1
+	 */
+	private $_enabled = array();
+
+	/**
 	 * Displays the comments after the content.
 	 *
 	 * Method is called by the view and the results are imploded and displayed in a placeholder
 	 *
 	 * @param   string   $context     The context for the content passed to the plugin.
-	 * @param   object   &$acticle    The content object.  Note $article->text is also available.
-	 * @param   object   &$params     The content params.
+	 * @param   object   $acticle     The content object.  Note $article->text is also available.
+	 * @param   object   $params      The content params.
 	 * @param   integer  $limitstart  The 'page' number.
 	 *
 	 * @return  string
 	 *
 	 * @since   1.0
 	 */
-	public function onContentAfterDisplay($context, &$article, &$params, $limitstart)
+	public function onContentAfterDisplay($context, $article, $params, $limitstart = 0)
 	{
+		if (!$this->_enabled($context, $article))
+		{
+			return '';
+		}
+
 		$providerId = $this->params->get('provider_id');
-		$enabled = $article->params->get('enable_artofcomments');
-
-		if (empty($providerId) || empty($article->id))
-		{
-			return '';
-		}
-
-		// Check the category parameters if the article has no information.
-		if ($enabled === null && $article->catid)
-		{
-			$db = JFactory::getDbo();
-			$q = $db->getQuery(true);
-			$q->select($q->qn('params'))
-				->from($q->qn('#__categories'))
-				->where(sprintf('%s = %d', $q->qn('id'), $article->catid));
-			$temp = json_decode((string) $db->setQuery($q)->loadResult());
-
-			if (isset($temp->enable_artofcomments))
-			{
-				$enabled = $temp->enable_artofcomments;
-			}
-		}
-
-		if (!$enabled)
-		{
-			return '';
-		}
-
 		$code = '<div id="disqus_thread"></div>'
 			. '<script type="text/javascript">'
 			. sprintf("var disqus_shortname = '%s';", JFilterOutput::cleanText($providerId))
@@ -84,6 +69,34 @@ class plgContentArtofcomments extends JPlugin
 	}
 
 	/**
+	 * Displays a link to the comments.
+	 *
+	 * Method is called by the view and the results are imploded and displayed in a placeholder
+	 *
+	 * @param   string   $context     The context for the content passed to the plugin.
+	 * @param   object   $acticle     The content object.  Note $article->text is also available.
+	 * @param   object   $params      The content params.
+	 * @param   integer  $limitstart  The 'page' number.
+	 *
+	 * @return  string
+	 *
+	 * @since   1.1
+	 */
+	public function onContentBeforeDisplay($context, $article, $params, $limitstart = 0)
+	{
+		if (!$this->_enabled($context, $article) || !$this->params->get('show_jump'))
+		{
+			return '';
+		}
+
+		$this->loadLanguage();
+
+		$code = '<p><a href="#disqus_thread">' . JText::_('PLG_ARTOFCOMMENTS_JUMP') . '</a></p>';
+
+		return $code;
+	}
+
+	/**
 	 * Prepares an article form or an article category form.
 	 *
 	 * @param   JForm  $form  The form to be altered.
@@ -92,7 +105,7 @@ class plgContentArtofcomments extends JPlugin
 	 * @return  boolean
 	 * @since   1.0
 	 */
-	function onContentPrepareForm($form, $data)
+	public function onContentPrepareForm($form, $data)
 	{
 		if (!($form instanceof JForm))
 		{
@@ -118,5 +131,73 @@ class plgContentArtofcomments extends JPlugin
 		$form->loadFile($forms[$name], false);
 
 		return true;
+	}
+
+	/**
+	 * Checks if comments are enabled for the context and article data.
+	 *
+	 * @param   string  $context  The context for the content passed to the plugin.
+	 * @param   object  $acticle  The content object.  Note $article->text is also available.
+	 *
+	 * @return  boolean True if comments are enabled for this article, false otherwise.
+	 *
+	 * @since   1.1
+	 */
+	private function _enabled($context, $article)
+	{
+		$providerId = $this->params->get('provider_id');
+		$enabledKey = $context . '-' . (int) $article->id;
+
+		if (empty($providerId) || empty($article->id))
+		{
+			return false;
+		}
+		elseif (isset($this->_enabled[$enabledKey]))
+		{
+			return $this->_enabled[$enabledKey];
+		}
+
+		try
+		{
+			// $context gives us no clue about the view we are in.
+			$app = JFactory::getApplication();
+			$view = $app->input->get('view');
+
+			if ($context != 'com_content.article')
+			{
+				throw new Exception;
+			}
+
+			if ($view != 'article')
+			{
+				throw new Exception;
+			}
+
+			$enabled = $article->params->get('enable_artofcomments');
+
+			// Check the category parameters if the article has no information.
+			if ($enabled === null && isset($article->catid) && $article->catid)
+			{
+				$db = JFactory::getDbo();
+				$q = $db->getQuery(true);
+				$q->select($q->qn('params'))
+					->from($q->qn('#__categories'))
+					->where(sprintf('%s = %d', $q->qn('id'), $article->catid));
+				$temp = json_decode((string) $db->setQuery($q)->loadResult());
+
+				if (isset($temp->enable_artofcomments))
+				{
+					$enabled = $temp->enable_artofcomments;
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			$enabled = false;
+		}
+
+		$this->_enabled[$enabledKey] = $enabled;
+
+		return $enabled;
 	}
 }
