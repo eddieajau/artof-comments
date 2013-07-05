@@ -54,6 +54,8 @@ class plgContentArtofcomments extends JPlugin
 			. '<script type="text/javascript">'
 			. sprintf("var disqus_shortname = '%s';", JFilterOutput::cleanText($providerId))
 			. sprintf("var disqus_developer = %d;", $this->params->get('developer', 0))
+			. sprintf("var disqus_config = function () {   this.language = '%s'; };",
+				  str_replace("-","_",JFactory::getLanguage()->getTag()))
 			. sprintf("var disqus_identifier = '/joomla/%s/%d';", JFilterOutput::cleanText($context), $article->id)
 // 			. sprintf("var disqus_title = '%s';", $article->title)
 			. '(function() {'
